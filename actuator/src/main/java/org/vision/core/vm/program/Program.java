@@ -786,6 +786,7 @@ public class Program {
       VM vm = new VM(config);
       Program program = new Program(programCode, programInvoke, internalTx, config);
       program.setRootTransactionId(this.rootTransactionId);
+      logger.info("Program execute will vm.play(program) 1");
       vm.play(program);
       createResult = program.getResult();
       getTrace().merge(program.getTrace());
@@ -1000,6 +1001,7 @@ public class Program {
       VM vm = new VM(config);
       Program program = new Program(programCode, programInvoke, internalTx, config);
       program.setRootTransactionId(this.rootTransactionId);
+      logger.info("Program execute will vm.play(program) 2");
       vm.play(program);
       callResult = program.getResult();
 

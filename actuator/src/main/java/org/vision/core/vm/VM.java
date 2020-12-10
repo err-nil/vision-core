@@ -83,6 +83,7 @@ public class VM {
     if (config.vmTrace()) {
       program.saveOpTrace();
     }
+    logger.info("VM.step start1");
 
     try {
       OpCode op = OpCode.code(program.getCurrentOp());
@@ -105,6 +106,7 @@ public class VM {
         throw Program.Exception.invalidOpCode(program.getCurrentOp());
       }
 
+      logger.info("VM.step start 2");
       program.setLastOp(op.val());
       program.verifyStackSize(op.require());
       program.verifyStackOverflow(op.require(), op.ret()); //Check not exceeding stack limits
@@ -301,6 +303,9 @@ public class VM {
 
       program.spendEnergy(energyCost, op.name());
       program.checkCPUTimeLimit(op.name());
+      logger.info("VM.step start3");
+
+      logger.info("VM.step Execute operation start");
 
       // Execute operation
       switch (op) {
@@ -1436,8 +1441,9 @@ public class VM {
         default:
           break;
       }
-
+      logger.info("VM.step Execute operation end");
       program.setPreviouslyExecutedOp(op.val());
+      logger.info("VM.step end, get Opcode = {}", op.val());
     } catch (RuntimeException e) {
       logger.info("VM halted: [{}]", e.getMessage());
       if (!(e instanceof Program.TransferException)) {
