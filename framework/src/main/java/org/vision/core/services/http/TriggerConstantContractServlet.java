@@ -53,6 +53,7 @@ public class TriggerConstantContractServlet extends RateLimiterServlet {
 
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    logger.info("TriggerConstantContractServlet begin");
     TriggerSmartContract.Builder build = TriggerSmartContract.newBuilder();
     TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
     Return.Builder retBuilder = Return.newBuilder();
@@ -88,9 +89,13 @@ public class TriggerConstantContractServlet extends RateLimiterServlet {
       trxExtBuilder.setTransaction(trx);
       retBuilder.setResult(true).setCode(response_code.SUCCESS);
     } catch (ContractValidateException e) {
+      logger.info("TriggerConstantContractServlet ContractValidateException");
+      e.printStackTrace();
       retBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
           .setMessage(ByteString.copyFromUtf8(e.getMessage()));
     } catch (Exception e) {
+      logger.info("TriggerConstantContractServlet Exception");
+      e.printStackTrace();
       String errString = null;
       if (e.getMessage() != null) {
         errString = e.getMessage().replaceAll("[\"]", "\'");

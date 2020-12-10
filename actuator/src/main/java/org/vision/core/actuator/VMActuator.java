@@ -147,17 +147,19 @@ public class VMActuator implements Actuator2 {
 
   @Override
   public void execute(Object object) throws ContractExeException {
+    logger.info("VMActuator execute begin");
     TransactionContext context = (TransactionContext) object;
     if (Objects.isNull(context)) {
       throw new RuntimeException("TransactionContext is null");
     }
-
+    logger.info("VMActuator execute context is not null, check vm:"+(vm != null));
     ProgramResult result = context.getProgramResult();
     try {
       if (vm != null) {
         if (null != blockCap && blockCap.generatedByMyself && blockCap.hasWitnessSignature()
             && null != TransactionUtil.getContractRet(trx)
             && contractResult.OUT_OF_TIME == TransactionUtil.getContractRet(trx)) {
+          logger.info("VMActuator execute will throw OutOfTimeException");
           result = program.getResult();
           program.spendAllEnergy();
 
@@ -166,7 +168,7 @@ public class VMActuator implements Actuator2 {
           result.setException(e);
           throw e;
         }
-
+        logger.info("VMActuator execute will vm.play(program)");
         vm.play(program);
         result = program.getResult();
 
@@ -185,7 +187,7 @@ public class VMActuator implements Actuator2 {
           context.setProgramResult(result);
           return;
         }
-
+        logger.info("VMActuator execute trxType:"+(InternalTransaction.TrxType.TRX_CONTRACT_CREATION_TYPE == trxType)+" revert:"+!result.isRevert());
         if (InternalTransaction.TrxType.TRX_CONTRACT_CREATION_TYPE == trxType && !result.isRevert()) {
           byte[] code = program.getResult().getHReturn();
           long saveCodeEnergy = (long) getLength(code) * EnergyCost.getInstance().getCREATE_DATA();
@@ -203,7 +205,7 @@ public class VMActuator implements Actuator2 {
             }
           }
         }
-
+        logger.info("VMActuator execute exception:"+(result.getException() != null)+" revert:"+result.isRevert());
         if (result.getException() != null || result.isRevert()) {
           result.getDeleteAccounts().clear();
           result.getLogInfoList().clear();
@@ -235,6 +237,8 @@ public class VMActuator implements Actuator2 {
         repository.commit();
       }
     } catch (JVMStackOverFlowException e) {
+      logger.info("VMActuator execute JVMStackOverFlowException");
+      e.printStackTrace();
       program.spendAllEnergy();
       result = program.getResult();
       result.setException(e);
@@ -242,6 +246,8 @@ public class VMActuator implements Actuator2 {
       result.setRuntimeError(result.getException().getMessage());
       logger.info("JVMStackOverFlowException: {}", result.getException().getMessage());
     } catch (OutOfTimeException e) {
+      logger.info("VMActuator execute OutOfTimeException");
+      e.printStackTrace();
       program.spendAllEnergy();
       result = program.getResult();
       result.setException(e);
@@ -249,6 +255,8 @@ public class VMActuator implements Actuator2 {
       result.setRuntimeError(result.getException().getMessage());
       logger.info("timeout: {}", result.getException().getMessage());
     } catch (Throwable e) {
+      logger.info("VMActuator execute Throwable");
+      e.printStackTrace();
       if (!(e instanceof TransferException)) {
         program.spendAllEnergy();
       }

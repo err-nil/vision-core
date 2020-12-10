@@ -2449,7 +2449,7 @@ public class Wallet {
       TransactionCapsule trxCap, Builder builder,
       Return.Builder retBuilder)
       throws ContractValidateException, ContractExeException, HeaderNotFound, VMIllegalException {
-
+    logger.info("Wallet triggerConstantContract begin");
     ContractStore contractStore = chainBaseManager.getContractStore();
     byte[] contractAddress = triggerSmartContract.getContractAddress()
         .toByteArray();
@@ -2464,7 +2464,7 @@ public class Wallet {
     if (!Args.getInstance().isSupportConstant()) {
       throw new ContractValidateException("this node does not support constant");
     }
-
+    logger.info("Wallet will callConstantContract");
     return callConstantContract(trxCap, builder, retBuilder);
   }
 
@@ -2472,11 +2472,11 @@ public class Wallet {
       builder,
       Return.Builder retBuilder)
       throws ContractValidateException, ContractExeException, HeaderNotFound, VMIllegalException {
-
+    logger.info("Wallet callConstantContract begin");
     if (!Args.getInstance().isSupportConstant()) {
       throw new ContractValidateException("this node does not support constant");
     }
-
+    logger.info("Wallet callConstantContract :"+Args.getInstance().isSupportConstant());
     Block headBlock;
     List<BlockCapsule> blockCapsuleList = chainBaseManager.getBlockStore()
         .getBlockByLatestNum(1);
@@ -2485,7 +2485,7 @@ public class Wallet {
     } else {
       headBlock = blockCapsuleList.get(0).getInstance();
     }
-
+    logger.info("Wallet callConstantContract latest block:"+headBlock.getSerializedSize());
     TransactionContext context = new TransactionContext(new BlockCapsule(headBlock), trxCap,
         StoreFactory.getInstance(), true,
         false);

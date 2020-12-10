@@ -55,3 +55,4 @@ nodeId.properties
 
 # vm_trace
 /vm_trace/
+/protocol/src/main/java/
