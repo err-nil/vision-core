@@ -171,6 +171,7 @@ public class VMActuator implements Actuator2 {
         logger.info("VMActuator execute will vm.play(program)");
         vm.play(program);
         result = program.getResult();
+        logger.info("VMActuator execute get result = {}", result);
 
         if (isConstantCall) {
           long callValue = TransactionCapsule.getCallValue(trx.getRawData().getContract(0));
@@ -183,8 +184,10 @@ public class VMActuator implements Actuator2 {
           if (result.getException() != null) {
             result.setRuntimeError(result.getException().getMessage());
             result.rejectInternalTransactions();
+            logger.info("VMActuator call constant appear an exception = {}.", result.getException().getMessage());
           }
           context.setProgramResult(result);
+          logger.info("VMActuator call constant finish.");
           return;
         }
         logger.info("VMActuator execute trxType:"+(InternalTransaction.TrxType.TRX_CONTRACT_CREATION_TYPE == trxType)+" revert:"+!result.isRevert());
@@ -202,6 +205,7 @@ public class VMActuator implements Actuator2 {
             result.spendEnergy(saveCodeEnergy);
             if (VMConfig.allowVvmConstantinople()) {
               repository.saveCode(program.getContractAddress().getNoLeadZeroesData(), code);
+              logger.info("VMActuator allowVvmConstantinople ,repository.saveCode  deploy success.");
             }
           }
         }
@@ -214,17 +218,21 @@ public class VMActuator implements Actuator2 {
           result.getDeleteVotes().clear();
           result.getDeleteDelegation().clear();
 
+          logger.info("VMActuator execute revert, because of exception or result revert.");
           if (result.getException() != null) {
             if (!(result.getException() instanceof TransferException)) {
               program.spendAllEnergy();
+              logger.info("VMActuator execute TransferException, spend all energy.");
             }
             result.setRuntimeError(result.getException().getMessage());
+            logger.info("VMActuator execute TransferException= {}", result.getException().getMessage());
             throw result.getException();
           } else {
             result.setRuntimeError("REVERT opcode executed");
           }
         } else {
           repository.commit();
+          logger.info("VMActuator execute success, result commit, tx broadcast.");
 
           if (logInfoTriggerParser != null) {
             List<ContractTrigger> triggers = logInfoTriggerParser
@@ -235,6 +243,7 @@ public class VMActuator implements Actuator2 {
         }
       } else {
         repository.commit();
+        logger.info("VMActuator execute success but empty, because vm == null.");
       }
     } catch (JVMStackOverFlowException e) {
       logger.info("VMActuator execute JVMStackOverFlowException");
@@ -285,6 +294,7 @@ public class VMActuator implements Actuator2 {
       }
 
       String txHash = Hex.toHexString(rootInternalTransaction.getHash());
+      logger.info("VMActuator execute success, start saveProgramTraceFile.");
       VMUtils.saveProgramTraceFile(txHash, traceContent);
     }
 
@@ -379,6 +389,7 @@ public class VMActuator implements Actuator2 {
               tokenValue, tokenId, blockCap.getInstance(), repository, vmStartInUs,
               vmShouldEndInUs, energyLimit);
       this.vm = new VM();
+      logger.info("VMActuator create() new VM = {}", vm);
       this.program = new Program(ops, programInvoke, rootInternalTransaction, vmConfig
       );
       byte[] txId = TransactionUtil.getTransactionId(trx).getBytes();
@@ -494,6 +505,7 @@ public class VMActuator implements Actuator2 {
         programInvoke.setConstantCall();
       }
       this.vm = new VM();
+      logger.info("VMActuator call() new VM = {}", vm);
       rootInternalTransaction = new InternalTransaction(trx, trxType);
       this.program = new Program(code, programInvoke, rootInternalTransaction, vmConfig);
       byte[] txId = TransactionUtil.getTransactionId(trx).getBytes();
