@@ -302,7 +302,8 @@ public class VM {
       }
 
       program.spendEnergy(energyCost, op.name());
-      program.checkCPUTimeLimit(op.name());
+      // todo remove timelimit for debug
+//      program.checkCPUTimeLimit(op.name());
       logger.info("VM.step start3");
 
       logger.info("VM.step Execute operation start");
